@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """log message obfuscate model.
 """
-from typing import field
+from typing import List
 import re
+import os
+import logging
 
+patterns = {
+    'extract': lambda x, y: r'(?P<field>{})=[^{}]*'.format('|'.join(x), y),
+    'replace': lambda x: r'\g<field>={}'.format(x),
+}
+PII_FIELD = ("name", "email", "phone", "ssn", "password")
 
-def filter_datum(fields, redaction, message, separator):
-    """Function returns log message eobfuscated
-    Attributes:
-        fields: a list of strings representing all fields to obfuscate
-        redaction: a list representing by what the field will be obfuscated
-        message: a string representing the log line
-        separator: a string representing by which character is separating all fields"""
-    return re.sub('|'.join(fields), redaction, message)
+def filter_datum(fields: List[str], redaction: str, message: str, separator: str) -> str:
+    """filter results"""
+    extract, replace = (patterns["extract"], patterns["replace"])
+    return re.sub(extract(fields, separator), replace(redaction), message)
