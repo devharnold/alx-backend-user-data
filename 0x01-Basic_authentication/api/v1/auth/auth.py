@@ -27,7 +27,7 @@ class Auth:
         """flask request object to handle the authorization header
         """
         if request is not None:
-            return request.headers.et('Authorization', None)
+            return request.headers.get('Authorization', None)
         return None
     
     def current_user(self, request=None) -> TypeVar('User'):
