@@ -2,9 +2,10 @@
 """Basic Auth module
 """
 import re
-from typing import TypeVar
+from typing import TypeVar, Tuple
 from api.v1.auth.auth import Auth
 import base64
+
 
 class BasicAuth(Auth):
     """BasicAuthentication class"""
@@ -44,3 +45,22 @@ class BasicAuth(Auth):
         #
         #return decoded_bytes.decode('utf-8')
     
+    def extract_user_credentials(self, decoded_base64_authorization_header: str) -> Tuple[str, str]:
+        """
+        : function used to return the user email and password from the Base64 decoded value
+        """
+        if type(decoded_base64_authorization_header) == str:
+            pattern = r'user:password'
+            field_match = re.fullmatch(pattern, decoded_base64_authorization_header.strip())
+            if field_match is not None:
+                user = field_match.group('user')
+                password = field_match.group('password')
+                return user, password
+        return None, None
+
+        #if decoded_base64_authorization_header is None:
+        #    return None
+        #if not isinstance(decoded_base64_authorization_header, str):
+        #    return None
+        #
+        
