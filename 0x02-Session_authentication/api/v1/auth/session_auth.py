@@ -32,7 +32,7 @@ class SessionAuth(Auth):
         if type(session_id) is str:
             return self.user_id_by_session_id.get(session_id)
         
-    def current_user(self, request=None) -> TypeVar('User'):
+    def current_user(self, request=None):
         """
         : returns a user instance based on a cookie value
         """
