@@ -3,30 +3,18 @@
 """
 import os
 from api.v1.auth.auth import Auth
+from uuid import uuid4
 
 class SessionAuth(Auth):
     """SessionAuthenticate class
     """
-    pass
-
-    def validate_inheritance():
+    user_id_by_session_id = {}
+    
+    def create_session(self, user_id: str = None) -> str:
         """
-        : to check if sessionauth inherits from auth
+        : creates a SessionId for `user_id`
         """
-        if issubclass(SessionAuth, Auth):
-            print('SessionAuth inherits successfully from Auth')
-        else:
-            print("SessionAuth does not inherit!")
-
-    def validate_switch():
-        """
-        : to check environment variable to determine authentication mechanism
-        """
-        auth_mechanism = os.environ.get("AUTH_MECHANISM")
-
-        if auth_mechanism == "session":
-            print("Using SessionAuth for authentication")
-            auth = SessionAuth()
-        else:
-            print("Using Auth for authentication")
-            auth = Auth()
+        if type(user_id)is str:
+            session_id = str(uuid4())
+            self.user_id_by_session_id[session_id] = user_id
+            return session_id
