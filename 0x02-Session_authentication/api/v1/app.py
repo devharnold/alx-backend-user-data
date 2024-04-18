@@ -44,6 +44,7 @@ def forbidden(error) -> str:
 def authenticate_user():
     """Authenticate a user first before processing a request.
     """
+    request.current_user = auth.current_user(request)
     if auth:
         excluded_paths = [
             '/api/v1/status',
@@ -58,7 +59,7 @@ def authenticate_user():
             if user is None:
                 abort(403)
     
-    request.current_user = auth.current_user(request)
+
 
 
 if __name__ == "__main__":
