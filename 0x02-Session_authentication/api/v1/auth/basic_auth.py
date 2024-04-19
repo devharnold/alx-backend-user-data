@@ -5,6 +5,7 @@ import re
 from typing import TypeVar, Tuple
 from api.v1.auth.auth import Auth
 import base64
+from models.user import User
 
 
 class BasicAuth(Auth):
