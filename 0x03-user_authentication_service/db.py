@@ -31,7 +31,7 @@ class DB:
             self.__session = DBSession()
         return self.__session
     
-    def add_user(email: str, hashed_password: str):
+    def add_user(email: str, hashed_password: str) -> User:
         """Add a user with email and hashed_password as the arguments
         : params; email(str) The email address of the user
                   hashed_password(str) The password of the user
