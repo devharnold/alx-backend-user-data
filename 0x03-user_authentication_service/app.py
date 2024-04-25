@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 from flask import Flask
 from flask import jsonify
-
+from auth import Auth
 
 app = Flask(__name__)
+AUTH = Auth()
 
 @app.route("/", methods=['GET'])
 def welcome():
