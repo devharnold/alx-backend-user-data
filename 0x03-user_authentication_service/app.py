@@ -7,14 +7,14 @@ from auth import Auth
 app = Flask(__name__)
 AUTH = Auth()
 
-@app.route("/", methods=['GET'])
-def welcome():
+@app.route("/", methods=['GET'], strict_slashes=False)
+def welcome() -> str:
     """returns a jsonified welcome message
     """
     return jsonify({"message": "Bienvenue"})
 
-@app.route("/users", methods=["POST"])
-def register_user(email: str, password: str) -> str:
+@app.route("/users", methods=["POST"], strict_slashes=False)
+def users(email: str, password: str) -> str:
     """implements the POST /users route
     the endpoint shoud expect two form data fields; email and password
     if the user does not exist, the endpoint should register it and respond 
@@ -29,7 +29,7 @@ def register_user(email: str, password: str) -> str:
     except ValueError:
         return jsonify({"message": "email already registered"}), 400
 
-@app.route("/sessions", methods=["POST"])
+@app.route("/sessions", methods=["POST"], strict_slashes=False)
 def login() -> str:
     """The request is expected to contain form data with email and password fields
     If the login information is incorrect, use flask.abort to respond with a 401 HTTP status
@@ -46,7 +46,7 @@ def login() -> str:
     return response
 
 
-@app.route("/sessions", methods=["DELETE"])
+@app.route("/sessions", methods=["DELETE"], strict_slashes=False)
 def logout() -> str:
     """The request is expected to contain the session ID as a cookie with key "session_id".
     Find the user with the requested session ID. If the user exists destroy the session and redirect
@@ -59,7 +59,7 @@ def logout() -> str:
     AUTH.destroy_session(user.id)
     return redirect("/")
     
-@app.route("/profile", methods=["GET"])
+@app.route("/profile", methods=["GET"], strict_slashes=False)
 def get_profile() -> str:
     """
     Get a profile route
@@ -73,7 +73,7 @@ def get_profile() -> str:
         abort(403)
     return jsonify({"email": user.email})
 
-@app.route("/reset_password", methods=["POST"])
+@app.route("/reset_password", methods=["POST"], strict_slashes=False)
 def get_reset_password_token():
     """
     The request is expected to contain form data with the "email" field
@@ -90,7 +90,7 @@ def get_reset_password_token():
         abort(403)
     return jsonify({"email": email, "reset_token": token})
     
-@app.route("/reset_password", methods=["PUT"])
+@app.route("/reset_password", methods=["PUT"], strict_slashes=False)
 def update_password():
     """Update password with "email", "reset_token", and "new_password" fields
     If token is invalid, catch the exception and respond with a 403 HTTP code.
