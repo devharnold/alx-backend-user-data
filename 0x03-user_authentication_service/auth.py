@@ -14,11 +14,6 @@ def _hash_password(password: str) -> bytes:
     """
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
-def _generate_uuid() -> str:
-    """Generates a uuid
-    Return: A string representation of the uuid
-    """
-    return str(uuid())
 
 class Auth:
     """
@@ -44,6 +39,13 @@ class Auth:
         except NoResultFound:
             return self._db.add_user(email, _hash_password(password))
         raise ValueError(f"User's {email} already exists")
+    
+    def _generate_uuid() -> str:
+        """Generates a uuid
+        Return: A string representation of the uuid
+        """
+        return str(uuid())
+
         
     def valid_login(self, email: str, password: str) -> bool:
         """try locating user by email.
