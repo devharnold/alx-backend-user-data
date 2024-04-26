@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from flask import Flask
-from flask import jsonify, request
+from flask import jsonify, request, abort, redirect
 from auth import Auth
 app = Flask(__name__)
 AUTH = Auth()
@@ -12,7 +12,7 @@ def welcome():
     return jsonify({"message": "Bienvenue"})
 
 @app.route("/users", methods=["POST"])
-def register_user(email: str, password: str):
+def register_user(email: str, password: str) -> str:
     """implements the POST /users route
     the endpoint shoud expect two form data fields; email and password
     if the user does not exist, the endpoint should register it and respond 
@@ -28,7 +28,7 @@ def register_user(email: str, password: str):
         return jsonify({"message": "email already registered"}), 400
 
 @app.route("/sessions", methods=["POST"])
-def login():
+def login() -> str:
     """The request is expected to contain form data with email and password fields
     If the login information is incorrect, use flask.abort to respond with a 401 HTTP status
     Otherwise create a new session or the user, store the sessionID
@@ -36,26 +36,29 @@ def login():
     email = request.form.get('email')
     password = request.form.get('password')
 
-    if AUTH.valid_login(email, password):
-        session_id = AUTH.create_session(email)
-        return jsonify({"email": email, "message": "logged in"})
-    else:
-        return jsonify({"message": "wrong password"}), 401
+    if not AUTH.valid_login(email, password):
+        abort(401)
+    session_id = AUTH.create_session(email)
+    response = jsonify({"email": email, "message": "logged in"})
+    response.set_cookie("session_id", session_id)
+    return response
+
 
 @app.route("/sessions", methods=["DELETE"])
-def logout():
+def logout() -> str:
     """The request is expected to contain the session ID as a cookie with key "session_id".
     Find the user with the requested session ID. If the user exists destroy the session and redirect
     the user to GET /. If the user does not exist, respond with a 403 HTTP status.
     """
     session_id = request.cookies.get('session_id')
-    if AUTH.destroy_session(session_id):
-        return jsonify({"message": "Bienvenue"})
-    else:
-        return jsonify({"message": "Unauthorized"}), 403
+    user = AUTH.get_user_from_session_id(session_id)
+    if user is None:
+        abort(403)
+    AUTH.destroy_session(user.id)
+    return redirect("/")
     
 @app.route("/profile", methods=["GET"])
-def get_profile():
+def get_profile() -> str:
     """
     Get a profile route
     The request is expected to contain a session_id cookie
@@ -64,11 +67,10 @@ def get_profile():
     """
     session_id = request.cookies.get('session_id')
     user = AUTH.get_user_from_session_id(session_id)
-    if user:
-        return jsonify({"email": user.email})
-    else:
-        return jsonify({"message": "Unauthorized"}), 403
-    
+    if user is None:
+        abort(403)
+    return jsonify({"email": user.email})
+
 @app.route("/reset_password", methods=["POST"])
 def get_reset_password_token():
     """
@@ -77,11 +79,14 @@ def get_reset_password_token():
     Otherwise generate a token and a HTTP response
     """
     email = request.form.get('email')
+    reset_token = None
     try:
         token = AUTH.get_reset_password_token(email)
-        return jsonify({"email": email, "reset_token": token}), 200
     except ValueError:
-        return jsonify({"message": "Unauthorized"}), 403
+        reset_token = None
+    if reset_token is None:
+        abort(403)
+    return jsonify({"email": email, "reset_token": token})
     
 @app.route("/reset_password", methods=["PUT"])
 def update_password():
@@ -92,11 +97,16 @@ def update_password():
     email = request.form.get('email')
     reset_token = request.form.get('reset_token')
     new_password = request.form.get('new_password')
+    is_password_change = False
     try:
-        AUTH.update_password(email, reset_token, new_password)
-        return jsonify({"email": email, "message": "Password updated"}), 200
+        AUTH.update_password(reset_token, new_password)
+        is_password_change = True
     except ValueError:
-        return jsonify({"message": "Unauthorized"}), 403   
+        is_password_change = False
+    if not is_password_change:
+        abort(403)
+    return jsonify({"email": email, "message": "Password updated"})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port="5000")
