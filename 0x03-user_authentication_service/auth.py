@@ -5,7 +5,7 @@ from db import DB
 from user import User, Base
 from sqlalchemy.orm.exc import NoResultFound
 from auth import Auth
-import uuid
+from uuid import uuid4
 from user import User, Base
 
 def _hash_password(password: str) -> bytes:
@@ -14,6 +14,11 @@ def _hash_password(password: str) -> bytes:
     """
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
+def _generate_uuid() -> str:
+    """Generates a uuid
+    Return: A string representation of the uuid
+    """
+    return str(uuid4())
 
 class Auth:
     """
@@ -39,14 +44,6 @@ class Auth:
         except NoResultFound:
             return self._db.add_user(email, _hash_password(password))
         raise ValueError(f"User's {email} already exists")
-    
-
-    def _generate_uuid() -> str:
-        """Generates a uuid
-        Return: A string representation of the uuid
-        """
-        new_uuid = uuid.uuid4()
-        return str(new_uuid)
 
         
     def valid_login(self, email: str, password: str) -> bool:
