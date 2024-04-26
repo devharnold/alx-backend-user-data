@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 import bcrypt
-from sqlalchemy import Column, Integer, String
 from db import DB
 from user import User, Base
 from sqlalchemy.orm.exc import NoResultFound
-from auth import Auth
 from uuid import uuid4
 
 def _hash_password(password: str) -> bytes:
