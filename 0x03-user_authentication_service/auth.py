@@ -6,7 +6,6 @@ from user import User, Base
 from sqlalchemy.orm.exc import NoResultFound
 from auth import Auth
 from uuid import uuid4
-from user import User, Base
 
 def _hash_password(password: str) -> bytes:
     """
